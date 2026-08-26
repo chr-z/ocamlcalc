@@ -33,6 +33,10 @@ jobs:
           echo "bundle ok ($(wc -c < js/app.js) bytes)"
       - name: Run test suite (real OCaml bundle + parity + i18n sync)
         run: node --test tests/*.test.mjs
+      - name: Functional E2E over the real bundle (jsdom)
+        run: |
+          npm i -D jsdom --no-audit --no-fund
+          node scripts/e2e_dom.mjs
       - name: Secret scan (no private keys committed)
         run: |
           ! grep -rInE '(BEGIN (RSA|EC|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9]{36}|sk-[A-Za-z0-9]{20,})' . --exclude-dir=.git \

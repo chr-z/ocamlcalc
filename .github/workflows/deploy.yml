@@ -36,6 +36,10 @@ jobs:
           bash scripts/build_engine.sh
       - name: Run tests before publishing (real OCaml bundle)
         run: node --test tests/*.test.mjs
+      - name: Functional E2E over the real bundle (jsdom)
+        run: |
+          npm i -D jsdom --no-audit --no-fund
+          node scripts/e2e_dom.mjs
       - name: Stamp service worker with deploy SHA
         run: sed -i "s/__OC_CACHE_VERSION__/oc-${GITHUB_SHA::7}/" sw.js && grep -o "CACHE_VERSION = 'oc-[a-f0-9]*'" sw.js
       - name: Setup Pages
