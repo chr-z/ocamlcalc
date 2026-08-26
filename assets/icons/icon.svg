@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffb347"/>
+      <stop offset="1" stop-color="#e8961e"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="26" fill="#241a0d"/>
+  <rect x="4" y="4" width="120" height="120" rx="26" fill="none" stroke="#45351c" stroke-width="3"/>
+  <!-- camel silhouette (OCaml mascot nod) -->
+  <path d="M34 96 L38 66 Q39 58 47 57 L61 56 Q64 44 76 43 Q90 42 93 55 Q95 62 90 68 L86 96 L78 96 L79 74 L52 74 L50 96 Z"
+        fill="url(#g)"/>
+  <circle cx="77" cy="49" r="3.4" fill="#241a0d"/>
+  <!-- equals sign = exactness -->
+  <rect x="40" y="100" width="48" height="6" rx="3" fill="#ffb347"/>
+  <rect x="40" y="110" width="48" height="6" rx="3" fill="#e8961e"/>
+</svg>

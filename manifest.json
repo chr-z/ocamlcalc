@@ -1,0 +1,18 @@
+{
+  "name": "OCamlCalc — exact financial calculator",
+  "short_name": "OCamlCalc",
+  "description": "Loans, savings and compound interest with exact decimal arithmetic. OCaml engine compiled to JavaScript.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1a1206",
+  "theme_color": "#1a1206",
+  "icons": [
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OCamlCalc — exact financial calculator</title>
+<meta name="description" content="Loans, savings and compound interest computed with EXACT decimal arithmetic. The engine is OCaml compiled to JavaScript via js_of_ocaml — zero floats, zero rounding surprises. Free, offline, no signup.">
+<meta name="theme-color" content="#1a1206">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#amt" data-i18n="a11y.skip">Skip to calculator</a>
+
+<header class="topbar">
+  <div class="brand">
+    <img src="assets/icons/icon.svg" alt="" width="30" height="30">
+    <div>
+      <strong>OCamlCalc</strong>
+      <span class="tagline" data-i18n="brand.tagline">Money math that never lies.</span>
+    </div>
+  </div>
+  <div class="controls">
+    <select id="langSel" aria-label="Language / Idioma">
+      <option value="en">EN</option>
+      <option value="pt-BR">PT-BR</option>
+    </select>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <span class="badge-c">OCaml → JavaScript · js_of_ocaml · zero floats</span>
+    <h1 data-i18n="hero.title">Exact money math, in your browser.</h1>
+    <p data-i18n="hero.subtitle">Every cent is computed by an OCaml engine compiled to JavaScript: arbitrary-precision integers, banker's rounding on exact rationals, and a schedule you can audit line by line. Your data never leaves the device.</p>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Calculators">
+    <button id="tab-loan" class="tab active" role="tab" aria-selected="true" aria-controls="panel-loan" data-i18n="ui.tabLoan">Loan</button>
+    <button id="tab-savings" class="tab" role="tab" aria-selected="false" aria-controls="panel-savings" data-i18n="ui.tabSavings">Savings</button>
+    <button id="tab-compound" class="tab" role="tab" aria-selected="false" aria-controls="panel-compound" data-i18n="ui.tabCompound">Compound</button>
+  </nav>
+
+  <!-- LOAN -->
+  <section id="panel-loan" class="card panel" role="tabpanel">
+    <div class="field">
+      <label for="lAmount" data-i18n="ui.amount">Amount (currency units)</label>
+      <input id="lAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="100000.00">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="lRate" data-i18n="ui.rate">Annual rate (%)</label>
+        <input id="lRate" type="text" inputmode="decimal" autocomplete="off" placeholder="12">
+      </div>
+      <div class="field">
+        <label for="lMonths" data-i18n="ui.months">Months</label>
+        <input id="lMonths" type="text" inputmode="numeric" autocomplete="off" placeholder="24">
+      </div>
+    </div>
+    <div class="actions">
+      <button id="lGo" class="btn-primary" data-i18n="ui.calc">Calculate</button>
+      <button id="lSample" class="btn-ghost" data-i18n="ui.sample">Sample</button>
+    </div>
+    <p id="loanErr" class="err" hidden></p>
+    <section id="loanOut" hidden>
+      <div class="stats">
+        <div class="stat"><span data-i18n="ui.payment">Monthly payment</span><strong id="loPay"></strong></div>
+        <div class="stat"><span data-i18n="ui.totalInterest">Total interest</span><strong id="loInt"></strong></div>
+        <div class="stat"><span data-i18n="ui.totalPaid">Total paid</span><strong id="loPaid"></strong></div>
+        <div class="stat"><span data-i18n="ui.exactness">Engine</span><strong>OCaml · exact</strong></div>
+      </div>
+      <details open>
+        <summary data-i18n="ui.schedule">Amortization schedule</summary>
+        <div class="tbl-wrap">
+          <table id="loTable" class="tbl">
+            <thead><tr><th>#</th><th data-i18n="ui.thInterest">Interest</th><th data-i18n="ui.thPrincipal">Principal</th><th data-i18n="ui.thBalance">Balance</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+  </section>
+
+  <!-- SAVINGS -->
+  <section id="panel-savings" class="card panel" role="tabpanel" hidden>
+    <div class="row2">
+      <div class="field">
+        <label for="sInit" data-i18n="ui.initial">Initial deposit</label>
+        <input id="sInit" type="text" inputmode="decimal" autocomplete="off" placeholder="1000.00">
+      </div>
+      <div class="field">
+        <label for="sDep" data-i18n="ui.monthly">Monthly deposit</label>
+        <input id="sDep" type="text" inputmode="decimal" autocomplete="off" placeholder="200.00">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="sRate" data-i18n="ui.rate">Annual rate (%)</label>
+        <input id="sRate" type="text" inputmode="decimal" autocomplete="off" placeholder="10">
+      </div>
+      <div class="field">
+        <label for="sYears" data-i18n="ui.years">Years</label>
+        <input id="sYears" type="text" inputmode="numeric" autocomplete="off" placeholder="5">
+      </div>
+    </div>
+    <div class="actions">
+      <button id="sGo" class="btn-primary" data-i18n="ui.calc">Calculate</button>
+      <button id="sSample" class="btn-ghost" data-i18n="ui.sample">Sample</button>
+    </div>
+    <p id="savErr" class="err" hidden></p>
+    <section id="savOut" hidden>
+      <div class="stats">
+        <div class="stat"><span data-i18n="ui.finalBalance">Final balance</span><strong id="svBal"></strong></div>
+        <div class="stat"><span data-i18n="ui.deposited">Total deposited</span><strong id="svDep"></strong></div>
+        <div class="stat"><span data-i18n="ui.totalInterestEarned">Interest earned</span><strong id="svInt"></strong></div>
+        <div class="stat"><span data-i18n="ui.exactness">Engine</span><strong>OCaml · exact</strong></div>
+      </div>
+    </section>
+  </section>
+
+  <!-- COMPOUND -->
+  <section id="panel-compound" class="card panel" role="tabpanel" hidden>
+    <div class="field">
+      <label for="cPrincipal" data-i18n="ui.principal">Principal</label>
+      <input id="cPrincipal" type="text" inputmode="decimal" autocomplete="off" placeholder="25000.00">
+    </div>
+    <div class="row3">
+      <div class="field">
+        <label for="cRate" data-i18n="ui.rate">Annual rate (%)</label>
+        <input id="cRate" type="text" inputmode="decimal" autocomplete="off" placeholder="8.5">
+      </div>
+      <div class="field">
+        <label for="cYears" data-i18n="ui.years">Years</label>
+        <input id="cYears" type="text" inputmode="numeric" autocomplete="off" placeholder="10">
+      </div>
+      <div class="field">
+        <label for="cPery" data-i18n="ui.periodsPerYear">Periods / year</label>
+        <input id="cPery" type="text" inputmode="numeric" autocomplete="off" placeholder="4">
+      </div>
+    </div>
+    <div class="actions">
+      <button id="cGo" class="btn-primary" data-i18n="ui.calc">Calculate</button>
+      <button id="cSample" class="btn-ghost" data-i18n="ui.sample">Sample</button>
+    </div>
+    <p id="cmpErr" class="err" hidden></p>
+    <section id="cmpOut" hidden>
+      <div class="stats">
+        <div class="stat"><span data-i18n="ui.finalValue">Final value</span><strong id="cvFinal"></strong></div>
+        <div class="stat"><span data-i18n="ui.aer">Effective annual rate</span><strong id="cvAer"></strong></div>
+        <div class="stat"><span data-i18n="ui.periods">Periods</span><strong id="cvN"></strong></div>
+        <div class="stat"><span data-i18n="ui.exactness">Engine</span><strong>OCaml · exact</strong></div>
+      </div>
+    </section>
+  </section>
+
+  <section class="card why">
+    <h2 data-i18n="why.title">Why OCaml?</h2>
+    <p data-i18n="why.p1">Floating point can't represent 0.1 — so this app doesn't use it. The whole engine is integer arithmetic on big exact numbers, written in OCaml and compiled to plain JavaScript by js_of_ocaml.</p>
+    <p data-i18n="why.p2">The same source runs as a native binary in CI, where it must reproduce every golden result byte-for-byte before the bundle ships. Rounding follows the bankers' rule (half-to-even) applied to exact rationals — the same standard used by real accounting systems.</p>
+  </section>
+</main>
+
+<footer class="foot">
+  <span data-i18n="foot.made">Built by</span> <a href="https://github.com/chr-z">@chr-z</a> ·
+  <a href="https://github.com/chr-z/ocamlcalc" data-i18n="foot.source">source</a> ·
+  <span id="ver"></span>
+</footer>
+
+<script src="js/i18n.js"></script>
+<script src="js/app.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

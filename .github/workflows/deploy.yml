@@ -1,0 +1,48 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install OCaml toolchain (Debian)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ocaml-nox js-of-ocaml libjs-of-ocaml-dev m4
+      - name: Regenerate goldens and verify parity before publishing
+        run: |
+          python3 scripts/gen_goldens.py
+          git diff --exit-code -- tests/goldens.json tests/goldens.ml
+          bash scripts/build_engine.sh
+      - name: Run tests before publishing (real OCaml bundle)
+        run: node --test tests/*.test.mjs
+      - name: Stamp service worker with deploy SHA
+        run: sed -i "s/__OC_CACHE_VERSION__/oc-${GITHUB_SHA::7}/" sw.js && grep -o "CACHE_VERSION = 'oc-[a-f0-9]*'" sw.js
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4

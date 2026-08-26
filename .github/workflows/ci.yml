@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install OCaml toolchain (Debian)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ocaml-nox js-of-ocaml libjs-of-ocaml-dev m4
+      - name: Regenerate goldens from the Python decimal oracle
+        run: python3 scripts/gen_goldens.py
+      - name: Goldens are reproducible (committed == regenerated)
+        run: |
+          git diff --exit-code -- tests/goldens.json tests/goldens.ml \
+            || (echo 'goldens drifted from the oracle' && exit 1)
+      - name: Build engine (native parity suite + JS bundle)
+        run: bash scripts/build_engine.sh
+      - name: Verify the bundle exists and exposes the API
+        run: |
+          test -s js/app.js || (echo 'app.js missing' && exit 1)
+          grep -q excalcLoan js/app.js || (echo 'bundle missing excalcLoan' && exit 1)
+          echo "bundle ok ($(wc -c < js/app.js) bytes)"
+      - name: Run test suite (real OCaml bundle + parity + i18n sync)
+        run: node --test tests/*.test.mjs
+      - name: Secret scan (no private keys committed)
+        run: |
+          ! grep -rInE '(BEGIN (RSA|EC|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9]{36}|sk-[A-Za-z0-9]{20,})' . --exclude-dir=.git \
+            || (echo 'potential secret found' && exit 1)
+      - name: Validate JSON assets
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('manifest.json','utf8')); console.log('manifest ok')"
+          node -e "const i=JSON.parse(require('fs').readFileSync('locales/i18n.json','utf8')); const en=Object.keys(i.en).sort().join(); const pt=Object.keys(i['pt-BR']).sort().join(); if(en!==pt){console.error('locale key mismatch'); process.exit(1)} console.log('locales ok')"
